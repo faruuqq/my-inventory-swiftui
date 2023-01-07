@@ -16,6 +16,8 @@
 		2A8A4FAA296989320054D667 /* MyInventoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8A4FA9296989320054D667 /* MyInventoryTests.swift */; };
 		2A8A4FB4296989320054D667 /* MyInventoryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8A4FB3296989320054D667 /* MyInventoryUITests.swift */; };
 		2A8A4FB6296989320054D667 /* MyInventoryUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8A4FB5296989320054D667 /* MyInventoryUITestsLaunchTests.swift */; };
+		2A8A4FC42969BDF80054D667 /* InventoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8A4FC32969BDF70054D667 /* InventoryView.swift */; };
+		2A8A4FC62969BE000054D667 /* InventoryRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8A4FC52969BE000054D667 /* InventoryRow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +51,8 @@
 		2A8A4FAF296989320054D667 /* MyInventoryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyInventoryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A8A4FB3296989320054D667 /* MyInventoryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyInventoryUITests.swift; sourceTree = "<group>"; };
 		2A8A4FB5296989320054D667 /* MyInventoryUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyInventoryUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		2A8A4FC32969BDF70054D667 /* InventoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryView.swift; sourceTree = "<group>"; };
+		2A8A4FC52969BE000054D667 /* InventoryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +103,7 @@
 		2A8A4F91296989310054D667 /* MyInventory */ = {
 			isa = PBXGroup;
 			children = (
+				2A8A4FC22969BDCF0054D667 /* Inventory */,
 				2A8A4F92296989310054D667 /* MyInventoryApp.swift */,
 				2A8A4F94296989310054D667 /* Persistence.swift */,
 				2A8A4F99296989310054D667 /* ContentView.swift */,
@@ -133,6 +138,15 @@
 				2A8A4FB5296989320054D667 /* MyInventoryUITestsLaunchTests.swift */,
 			);
 			path = MyInventoryUITests;
+			sourceTree = "<group>";
+		};
+		2A8A4FC22969BDCF0054D667 /* Inventory */ = {
+			isa = PBXGroup;
+			children = (
+				2A8A4FC32969BDF70054D667 /* InventoryView.swift */,
+				2A8A4FC52969BE000054D667 /* InventoryRow.swift */,
+			);
+			path = Inventory;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -266,9 +280,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				2A8A4F93296989310054D667 /* MyInventoryApp.swift in Sources */,
+				2A8A4FC42969BDF80054D667 /* InventoryView.swift in Sources */,
 				2A8A4F98296989310054D667 /* MyInventory.xcdatamodeld in Sources */,
 				2A8A4F9A296989310054D667 /* ContentView.swift in Sources */,
 				2A8A4F95296989310054D667 /* Persistence.swift in Sources */,
+				2A8A4FC62969BE000054D667 /* InventoryRow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,8 +13,23 @@ struct PersistenceController {
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
+        let labels = [
+            "Hoodie",
+            "Sweater",
+            "Long Pants",
+            "Short Pants",
+            "T-Shirt",
+            "Shirt",
+            "Underwear",
+            "Hat",
+            "Socks",
+            "Gloves"
+        ]
+        for i in 0..<10 {
+            let newItem = Inventory(context: viewContext)
+            newItem.isInLaundry = i % 2 == 0 ? true : false
+            newItem.label = labels[i]
+            newItem.timesInLaundry = Int16(i)
             newItem.timestamp = Date()
         }
         do {
