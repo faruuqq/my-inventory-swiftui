@@ -9,19 +9,11 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
-    enum Tab {
-        case inventory
-        case laundry
-    }
     
-    @State private var tab: Tab = .inventory
-
     var body: some View {
-        TabView(selection: $tab) {
+        NavigationView {
             InventoryView()
-                .tabItem {
-                    Label("My Inventory", systemImage: "tray.2.fill")
-                }
+                .navigationTitle("My Inventory")
         }
     }
 }
@@ -29,5 +21,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }

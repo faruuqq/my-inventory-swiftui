@@ -9,7 +9,7 @@ import SwiftUI
 
 struct InventoryRow: View {
     
-    @State var inventory: Inventory
+    var inventory: Inventory
     
     var body: some View {
         HStack {
@@ -17,11 +17,19 @@ struct InventoryRow: View {
                 .resizable()
                 .frame(width: 50, height: 50)
                 .cornerRadius(5)
+            
             VStack(alignment: .leading) {
                 Text(inventory.label ?? "No Label")
-                Text("In laundry: \(inventory.timesInLaundry)x")
+                Text("Times In laundry: \(inventory.timesInLaundry)x")
                     .font(.caption)
                     .foregroundColor(.secondary)
+            }
+            
+            if inventory.isInLaundry {
+                Spacer()
+                Image(systemName: "archivebox.fill")
+                    .font(.system(size: 25))
+                    .foregroundColor(.teal)
             }
         }
     }

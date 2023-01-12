@@ -14,102 +14,129 @@ struct InventoryView: View {
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Inventory.timestamp, ascending: false)], animation: .easeIn)
     private var inventories: FetchedResults<Inventory>
     
-    @State private var editMode: EditMode = .inactive
-    @State private var multiSelection = Set<ObjectIdentifier>()
+    @State private var showInLaundry = false
+    @State private var showAddInventory = false
+    @State private var addLabel = ""
+    @State private var uploadedImage: UIImage?
+    @State private var showAlert = false
+    @State private var errorString = ""
+    
+    var filteredInventories: [Inventory] {
+        inventories.filter { inventory in
+            (!showInLaundry || inventory.isInLaundry)
+        }
+    }
     
     var body: some View {
-        NavigationView {
-            List(selection: $multiSelection) {
-                ForEach(inventories, id: \.id) { inventory in
-                    NavigationLink {
-                        VStack {
-                            inventoryImage(from: inventory)
-                                .resizable()
-                                .scaledToFill()
-                                .cornerRadius(5)
+        List {
+            Toggle(isOn: $showInLaundry) {
+                if showInLaundry {
+                    Text("In laundry")
+                } else {
+                    Text("Currently in laundry")
+                }
+            }
+            
+            ForEach(filteredInventories) { inventory in
+                NavigationLink {
+                    InventoryDetail(inventory: inventory)
+                } label: {
+                    HStack {
+                        inventoryImage(from: inventory)
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .cornerRadius(5)
+                        
+                        VStack(alignment: .leading) {
                             Text(inventory.label ?? "No Label")
-                            Text("Added at \(inventory.timestamp!, formatter: itemFormatter)")
-                            Spacer(minLength: 50)
+                            Text("Times In laundry: \(inventory.timesInLaundry)x")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
+                        
+                        if inventory.isInLaundry {
+                            Spacer()
+                            Image(systemName: "archivebox.fill")
+                                .font(.system(size: 25))
+                                .foregroundColor(.teal)
+                        }
+                    }
+                }
+                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    Button {
+                        markInLaundry(inventory: inventory)
                     } label: {
-                        InventoryRow(inventory: inventory)
+                        Label("", systemImage: "archivebox.fill")
                     }
-                    .toolbar(.hidden, for: .bottomBar)
+                    .tint(inventory.isInLaundry ? .red : .teal)
                 }
-                .onDelete(perform: deleteItems)
             }
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+        }
+        .toolbar {
+            ToolbarItem {
+                Button(action: addItem) {
+                    Label("Add Item", systemImage: "plus")
                 }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-                
-                if $editMode.wrappedValue == .active {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: moveToLaundry) {
-                            Label("Mark in laundry", systemImage: "archivebox.fill")
-                                .labelStyle(.titleAndIcon)
-                        }
+            }
+            
+            if showInLaundry {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: markFinished) {
+                        Label("Mark finished", systemImage: "checkmark.circle.fill")
+                            .labelStyle(.titleAndIcon)
                     }
                 }
             }
-            .navigationTitle("My Inventory")
-            .environment(\.editMode, $editMode)
+        }
+        .sheet(isPresented: $showAddInventory, onDismiss: {
+            guard !addLabel.isEmpty else { return }
+            let newInventory = Inventory(context: viewContext)
+            newInventory.label = addLabel
+            if let uploadedImage {
+                newInventory.image = uploadedImage.jpegData(compressionQuality: 0)
+            }
+            newInventory.isInLaundry = false
+            newInventory.timesInLaundry = 0
+            newInventory.timestamp = Date()
+            do {
+                try viewContext.save()
+            } catch {
+                errorString = error.localizedDescription
+            }
+        }) {
+            AddInventory(
+                label: $addLabel,
+                isBeingPresented: $showAddInventory,
+                uploadedImage: $uploadedImage)
+            .ignoresSafeArea()
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text(errorString),
+                dismissButton: .cancel(Text("OK"))
+            )
         }
     }
 }
 
 // MARK: - Functions
 extension InventoryView {
-    fileprivate func addItem() {
+    private func markInLaundry(inventory: Inventory) {
         withAnimation {
-            let labels = [
-                "Hoodie",
-                "Sweater",
-                "Long Pants",
-                "Short Pants",
-                "T-Shirt",
-                "Shirt",
-                "Underwear",
-                "Hat",
-                "Socks",
-                "Gloves"
-            ]
-            for i in 0..<7 {
-                let newItem = Inventory(context: viewContext)
-                newItem.isInLaundry = i % 2 == 0 ? true : false
-                newItem.label = labels[i]
-                newItem.timesInLaundry = Int16(i)
-                newItem.timestamp = Date()
+            inventory.isInLaundry.toggle()
+            if inventory.isInLaundry {
+                inventory.timesInLaundry += 1
             }
-            
             do {
                 try viewContext.save()
             } catch {
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                errorString = error.localizedDescription
             }
         }
-//        withAnimation {
-//            let newItem = Inventory(context: viewContext)
-//            newItem.label = "New item"
-//            newItem.timestamp = Date()
-//
-//            do {
-//                try viewContext.save()
-//            } catch {
-//                // Replace this implementation with code to handle the error appropriately.
-//                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-//                let nsError = error as NSError
-//                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-//            }
-//        }
+    }
+    
+    fileprivate func addItem() {
+        showAddInventory.toggle()
     }
 
     fileprivate func deleteItems(offsets: IndexSet) {
@@ -119,19 +146,9 @@ extension InventoryView {
             do {
                 try viewContext.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                errorString = error.localizedDescription
             }
         }
-    }
-    
-    private var itemFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter
     }
     
     fileprivate func inventoryImage(from inventory: Inventory) -> Image {
@@ -143,8 +160,15 @@ extension InventoryView {
         return defaultImage
     }
     
-    fileprivate func moveToLaundry() {
-        print("--faruuq: move to laundry")
+    fileprivate func markFinished() {
+        withAnimation {
+            filteredInventories.forEach { $0.isInLaundry.toggle() }
+            do {
+                try viewContext.save()
+            } catch {
+                errorString = error.localizedDescription
+            }
+        }
     }
 }
 
